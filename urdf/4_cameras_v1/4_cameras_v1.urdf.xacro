@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+<robot name="4_cameras_v1"
+       xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find v-nav-gazebo-sim)/urdf/camera.urdf.xacro" />
+    <xacro:include filename="$(find v-nav-gazebo-sim)/urdf/imu.urdf.xacro" />
+
+    <xacro:property name="update_rate" value="30"/>
+    <xacro:property name="fov" value="1.22"/>
+
+    <xacro:property name="x_d" value="0.1"/>
+    <xacro:property name="y_d" value="0.1"/>
+
+    <!-- Base link-->
+
+<!--    <link name="sim_world"></link>-->
+
+    <link name="base_link">
+        <!-- pose and inertial -->
+        <pose>0 0 0 0 0 0</pose>
+        <inertial>
+            <mass value="0.1"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <inertia ixx="0.206208333333" ixy="0" ixz="0" iyy="0.206208333333" iyz="0" izz="0.206208333333"/>
+        </inertial>
+        <!-- body -->
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="${x_d} ${y_d} 0.01"/>
+            </geometry>
+        </collision>
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="${x_d} ${y_d} 0.01"/>
+            </geometry>
+        </visual>
+    </link>
+
+
+    <!-- Cameras  -->
+    <xacro:macro name="hlp_camera" params="name xyz rpy">
+        <xacro:camera name="${name}" update_rate="${update_rate}" fov="${fov}" />
+        <joint name="${name}_joint" type="fixed">
+            <axis xyz="0 1 0" />
+            <origin xyz="${xyz}" rpy="${rpy}"/>
+            <parent link="base_link"/>
+            <child link="${name}_link"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:hlp_camera name="camera_0" xyz="${x_d/2} ${y_d/2} 0" rpy="0 0 0" />
+    <xacro:hlp_camera name="camera_1" xyz="${x_d/2} ${-y_d/2} 0" rpy="0 0 0" />
+    <xacro:hlp_camera name="camera_2" xyz="${-x_d/2} ${-y_d/2} 0" rpy="0 0 0" />
+    <xacro:hlp_camera name="camera_3" xyz="${-x_d/2} ${y_d/2} 0" rpy="0 0 0" />
+
+    <!-- IMU -->
+    <xacro:imu name="imu" update_rate="100"/>
+    <joint name="imu_joint" type="fixed">
+        <axis xyz="0 1 0" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="base_link"/>
+        <child link="imu_link"/>
+    </joint>
+
+    <!-- Pose publisher -->
+
+    <gazebo>
+        <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>50.0</updateRate>
+            <bodyName>base_link</bodyName>
+            <topicName>ground_truth/state</topicName>
+            <gaussianNoise>0.01</gaussianNoise>
+            <frameName>world</frameName>
+            <xyzOffsets>0 0 0</xyzOffsets>
+            <rpyOffsets>0 0 0</rpyOffsets>
+        </plugin>
+    </gazebo>
+</robot>

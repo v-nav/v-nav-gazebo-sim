@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find v-nav-gazebo-sim)/worlds/test.world"/>
+        <!--    <arg name="gui" value="false"/>-->
+        <!--    <arg name="headless" value="true"/>-->
+    </include>
+    <include file="$(find v-nav-gazebo-sim)/launch/s_model_4_cameras_v1.launch" >
+    </include>
+</launch>
