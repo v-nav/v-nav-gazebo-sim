@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:macro name="camera" params="name update_rate fov">
+    <xacro:macro name="camera_sensor_base" params="name width height update_rate horizontal_fov frame_name k1 k2 k3 p1 p2 cx cy cx_prime">
         <!-- Camera -->
         <link name="${name}_link">
             <collision>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
-                    <box size="0.04 0.04 0.04"/>
+                    <box size="0.03 0.03 0.03"/>
                 </geometry>
             </collision>
 
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
-                    <box size="0.04 0.04 0.04"/>
+                    <box size="0.03 0.03 0.03"/>
                 </geometry>
                 <material name="red"/>
             </visual>
@@ -27,16 +27,17 @@
         </link>
         <gazebo reference="${name}_link">
             <sensor type="camera" name="${name}">
+                <visualize>true</visualize>
                 <update_rate>${update_rate}</update_rate>
                 <camera name="${name}">
-                    <horizontal_fov>${fov}</horizontal_fov>
+                    <horizontal_fov>${horizontal_fov}</horizontal_fov>
                     <image>
-                        <width>640</width>
-                        <height>480</height>
+                        <width>${width}</width>
+                        <height>${height}</height>
                         <format>R8G8B8</format>
                     </image>
                     <clip>
-                        <near>0.02</near>
+                        <near>0.01</near>
                         <far>300</far>
                     </clip>
                     <noise>
@@ -47,21 +48,76 @@
                         <mean>0.0</mean>
                         <stddev>0.007</stddev>
                     </noise>
+                    <distortion>
+                        <k1>${k1}</k1>
+                        <k2>${k2}</k2>
+                        <k3>${k3}</k3>
+                        <p1>${p1}</p1>
+                        <p2>${p2}</p2>
+                        <center>${(cx - 0.5)/ width} ${(cy - 0.5) / height}</center>
+                    </distortion>
                 </camera>
                 <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
                     <alwaysOn>true</alwaysOn>
                     <cameraName>${name}</cameraName>
                     <imageTopicName>image_raw</imageTopicName>
                     <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-                    <frameName>${name}_link</frameName>
-                    <hackBaseline>0.07</hackBaseline>
-                    <distortionK1>0.0</distortionK1>
-                    <distortionK2>0.0</distortionK2>
-                    <distortionK3>0.0</distortionK3>
-                    <distortionT1>0.0</distortionT1>
-                    <distortionT2>0.0</distortionT2>
+                    <frameName>${frame_name}</frameName>
+<!--                    <hackBaseline>0.07</hackBaseline>-->
+<!--                    <distortionK1>0.0</distortionK1>-->
+<!--                    <distortionK2>0.0</distortionK2>-->
+<!--                    <distortionK3>0.0</distortionK3>-->
+<!--                    <distortionT1>0.0</distortionT1>-->
+<!--                    <distortionT2>0.0</distortionT2>-->
+                    <CxPrime>${cx_prime}</CxPrime>
+                    <Cx>${cx}</Cx>
+                    <Cy>${cy}</Cy>
+                    <distortionK1>${k1}</distortionK1>
+                    <distortionK2>${k2}</distortionK2>
+                    <distortionK3>${k3}</distortionK3>
+                    <distortionT1>${p1}</distortionT1>
+                    <distortionT2>${p2}</distortionT2>
                 </plugin>
             </sensor>
         </gazebo>
+    </xacro:macro>
+    <xacro:macro name="camera_sensor" params="name width height update_rate horizontal_fov k1:=0 k2:=0 k3:=0 p1:=0 p2:=0">
+        <xacro:camera_sensor_base
+                name="${name}"
+                width="${width}"
+                height="${height}"
+                update_rate="${update_rate}"
+                horizontal_fov="${horizontal_fov}"
+                frame_name="${name}_optical"
+                k1="${k1}"
+                k2="${k2}"
+                k3="${k3}"
+                p1="${p1}"
+                p2="${p2}"
+                cx="${(width + 1.0)/2.0}"
+                cy="${(height + 1.0)/2.0}"
+                cx_prime="${(width + 1.0)/2.0}"
+        />
+
+    </xacro:macro>
+    <xacro:macro name="simple_camera" params="name">
+        <xacro:camera_sensor name="${name}" width="640" height="480" update_rate="30" horizontal_fov="${120.0*pi/180.0}"/>
+    </xacro:macro>
+    <xacro:macro name="dist_camera" params="name">
+        <xacro:camera_sensor_base name="${name}"
+                                  frame_name="/${name}_optical"
+                                  width="320"
+                                  height="240"
+                                  update_rate="30"
+                                  horizontal_fov="1.8"
+                                  k1="-0.273377"
+                                  k2="0.0642871"
+                                  p1="-0.00086158"
+                                  p2="-0.000443529"
+                                  k3="-0.00599387"
+                                  cx="158.0735"
+                                  cy="108.513"
+                                  cx_prime="158.0735"
+        />
     </xacro:macro>
 </robot>
