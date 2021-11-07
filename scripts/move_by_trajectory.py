@@ -1,25 +1,29 @@
+import sys
+
 import numpy as np
 import rospy
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.msg import ModelState
 from geometry_msgs.msg import Pose, Twist, Point, Vector3, Quaternion
 import tf.transformations as tf_t
+import csv
+import sys
 
 rospy.init_node("move")
 # rospy.wait_for_service('add_two_ints')
 set_model_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
 
-poses = [
-    [np.array([0, 0, 0]), np.array([0, 0, 0])],
-    [np.array([0, 1, 1]), np.array([0, 0, -0.9])],
-    [np.array([0, 1, 0]), np.array([0, 0, 0])]
-]
+
+csv_file = open(sys.argv[1], "r")
+csv_reader = csv.reader(csv_file, delimiter=',', quotechar='|')
+
+poses = [[np.array([float(i) for i in row[1:4]]), np.array([float(i) for i in row[4:7]])] for row in csv_reader if len(row) > 2]
+
+
 poses.append(poses[-1])
-hz = 0.5
+hz = 24
 
 # prev = [np.array([0, 0, 0]), np.array([0, 0, 0])]
-
-
 
 
 def orientation_from_quaternion(q):
