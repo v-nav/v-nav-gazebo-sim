@@ -55,8 +55,8 @@ include_directories(
         ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${GAZEBO_INCLUDE_DIRS}
 )
 
-#catkin_install_python(PROGRAMS
-#        src/odometry_shifter.py
+# catkin_install_python(PROGRAMS
+#        scripts/play_animation.py
 #        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 #        )
 #

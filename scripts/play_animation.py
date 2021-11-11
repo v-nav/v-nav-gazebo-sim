@@ -1,5 +1,4 @@
 import sys
-
 import numpy as np
 import rospy
 from gazebo_msgs.srv import SetModelState

@@ -1,0 +1,1 @@
+python $(catkin_find v-nav-gazebo-sim)/scripts/play_animation.py
